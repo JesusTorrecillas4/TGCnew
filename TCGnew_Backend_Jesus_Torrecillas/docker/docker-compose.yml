@@ -1,14 +1,14 @@
-services:
-  mongo:
-    image: mongo
-    restart: always
+services: # Lista de contenedores que se van a crear
+  mongo: # Nombre de nuestro servicio (la base de datos)
+    image: mongo # Usa la imagen oficial de MongoDB
+    restart: always # Si se cae o reinicias el PC, se vuelve a encender solo
     ports:
-      - 4521:27017
+      - 4521:27017 # Puerto de tu PC : puerto dentro del contenedor
     environment:
-      MONGO_INITDB_ROOT_USERNAME: jesus
-      MONGO_INITDB_ROOT_PASSWORD: 1234
+      MONGO_INITDB_ROOT_USERNAME: jesus # Usuario administrador de MongoDB
+      MONGO_INITDB_ROOT_PASSWORD: 1234 # Contraseña del administrador
     volumes:
-      - mongo_data:/data/db
+      - mongo_data:/data/db # Guarda los datos en un volumen para no perderlos al apagar
 
 volumes:
-  mongo_data:
+  mongo_data: # Declara el volumen donde se guardan los datos
