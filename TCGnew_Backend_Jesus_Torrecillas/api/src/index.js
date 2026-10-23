@@ -1,4 +1,4 @@
-require('dotenv').config(); // Lee el archivo .env y carga sus variables (ej: MONGO_URI) en process.env
+/*require('dotenv').config(); // Lee el archivo .env y carga sus variables (ej: MONGO_URI) en process.env
 const express = require('express'); // Importa Express, la librería para crear el servidor web
 const connectDB = require('./config/db'); // Importa la función que conecta con MongoDB
 const app = express(); // Crea la aplicación (el servidor)
@@ -11,4 +11,14 @@ app.get('/', (req, res) => res.send('API TCGnew arrancado')); // Ruta de prueba:
 app.use('/api/cartas', cartaRoutes); // Todas las rutas de cartaRoutes empiezan por /api/cartas
 const PORT = process.env.PORT || 3000; // Usa el puerto del .env; si no existe, usa el 3000
 
-app.listen(PORT, () => console.log(`Servidor escoltant al port ${PORT}`)); // Arranca el servidor y avisa por consola
+app.listen(PORT, () => console.log(`Servidor escoltant al port ${PORT}`)); // Arranca el servidor y avisa por consola */
+
+require('dotenv').config(); // carga las variables del .env (ej: MONGO_URI) en process.env
+const connectDB = require('./config/db'); // conexión con MongoDB
+const app = require('./app'); // la aplicación Express (rutas y middleware)
+
+connectDB(); // conecta con la base de datos al arrancar
+
+const PORT = process.env.PORT || 3000;
+
+app.listen(PORT, () => console.log(`Servidor escoltant al port ${PORT}`));

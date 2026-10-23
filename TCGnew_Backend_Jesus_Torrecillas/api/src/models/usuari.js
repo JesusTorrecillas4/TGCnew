@@ -1,31 +1,49 @@
 const mongoose = require('mongoose'); // Importa mongoose
 
-
-const usuariSchema = new mongoose.Schema({ // Define el "molde" de un usuario
-    nom: { // Campo: nombre
-        type: String, // Tipo texto
-        required: true // Obligatorio
+const usuariSchema = new mongoose.Schema(
+  {
+    name: {
+      type: String,
+      required: [true, 'El nombre es obligatorio'],
+      trim: true,
+      minlength: [2, 'El nombre debe tener mínimo 2 caracteres'],
+      maxlength: [100, 'El nombre admite máximo 100 caracteres'],
     },
-
-    email: { // Campo: correo electrónico
-        type: String, // Tipo texto
-        required: true, // Obligatorio
-        unique: true, // No puede haber dos usuarios con el mismo email
-        match: /^[^\s@]+@[^\s@]+\.[^\s@]+$/ // Debe tener formato de email (algo@algo.algo)
+    email: {
+      type: String,
+      required: [true, 'El email es obligatorio'],
+      trim: true,
+      lowercase: true,
+      unique: true, // índice único en MongoDB (no es un validador)
+      match: [/^[^\s@]+@[^\s@]+\.[^\s@]+$/, 'Formato de email incorrecto'],
     },
-
-    password: { // Campo: contraseña
-        type: String, // Tipo texto
-        required: true, // Obligatorio
-        minlength: 8, // Mínimo 8 caracteres
-        maxlength: 1000 // Máximo 1000 caracteres
+    // Aquí se guarda SOLO el hash bcrypt, nunca la contraseña en claro.
+    passwordHash: {
+      type: String,
+      required: true,
+      select: false, // no se incluye en las consultas por defecto
     },
+    role: {
+      type: String,
+      enum: ['client', 'admin'],
+      default: 'client',
+    },
+    active: {
+      type: Boolean,
+      default: true,
+    },
+  },
+  {
+    timestamps: true,
+    toJSON: {
+      // Última barrera: nunca sale passwordHash en una respuesta JSON.
+      transform: (doc, ret) => {
+        delete ret.passwordHash;
+        delete ret.__v;
+        return ret;
+      },
+    },
+  }
+);
 
-    rol: { // Campo: rol del usuario
-        type: String, // Tipo texto
-        enum: ["usuari", "admin"], // Solo puede ser "usuari" o "admin"
-        default: "usuari" // Por defecto es "usuari"
-    }
-});
-
-module.exports = mongoose.model('Usuari', usuariSchema); // Crea el modelo de usuarios y lo exporta
+module.exports = mongoose.model('Usuari', usuariSchema);
