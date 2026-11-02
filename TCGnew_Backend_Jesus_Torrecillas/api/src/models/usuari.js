@@ -1,4 +1,5 @@
 const mongoose = require('mongoose'); // Importa mongoose
+const bcrypt = require('bcrypt');
 
 const usuariSchema = new mongoose.Schema(
   {
@@ -45,5 +46,20 @@ const usuariSchema = new mongoose.Schema(
     },
   }
 );
+
+// NUEVO: Hashear la contraseña antes de guardar
+usuariSchema.pre('save', async function () {
+
+  // Si la contraseña no ha cambiado, no hacemos nada
+  if (!this.isModified('passwordHash')) return;
+
+  // Generamos la sal
+  const salt = await bcrypt.genSalt(10);
+
+  // Convertimos la contraseña en un hash
+  this.passwordHash = await bcrypt.hash(this.passwordHash, salt);
+
+});
+
 
 module.exports = mongoose.model('Usuari', usuariSchema);

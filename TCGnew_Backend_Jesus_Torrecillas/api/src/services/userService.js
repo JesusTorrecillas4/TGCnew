@@ -1,4 +1,5 @@
 const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
 const User = require('../models/usuari');
 const AppError = require('../utils/AppError');
 const {
@@ -44,13 +45,80 @@ const checkPassword = (password) => {
   }
 };
 
-const createUser = async (body = {}) => {
+// NUEVO: REGISTRO
+const registerUser = async (body = {}) => {
+  rejectUnknownFields(body);
+  checkPassword(body.password);
+
+  const email = typeof body.email === 'string'
+    ? body.email.trim().toLowerCase()
+    : body.email;
+
+  const exists = await User.findOne({ email });
+
+  if (exists) {
+    throw new AppError(409, 'EMAIL_EXISTS', 'El email ya está registrado');
+  }
+
+  const passwordHash = await bcrypt.hash(body.password, SALT_ROUNDS);
+
+  const user = await new User({
+    name: body.name,
+    email,
+    passwordHash
+  }).save();
+
+  return user;
+};
+
+// NUEVO: LOGIN
+const loginUser = async (body = {}) => {
+  const email = typeof body.email === 'string'
+    ? body.email.trim().toLowerCase()
+    : '';
+
+  const password = body.password;
+
+  if (!email || typeof password !== 'string') {
+    throw new AppError(400, 'INVALID_DATA', 'Email y contraseña obligatorios');
+  }
+
+  const user = await User.findOne({ email }).select('+passwordHash');
+
+  if (!user || !user.active) {
+    throw new AppError(401, 'INVALID_CREDENTIALS', 'Credenciales incorrectas');
+  }
+
+  const validPassword = await bcrypt.compare(password, user.passwordHash);
+
+  if (!validPassword) {
+    throw new AppError(401, 'INVALID_CREDENTIALS', 'Credenciales incorrectas');
+  }
+
+  if (!process.env.JWT_SECRET) {
+    throw new Error('Falta configurar JWT_SECRET');
+  }
+
+  const token = jwt.sign(
+    { id: user._id.toString(), role: user.role },
+    process.env.JWT_SECRET,
+    { expiresIn: '1h' }
+  );
+
+  return { user, token };
+};
+
+/*const createUser = async (body = {}) => {
   rejectUnknownFields(body);
   checkPassword(body.password);
   const passwordHash = await bcrypt.hash(body.password, SALT_ROUNDS);
   // role y active NO vienen del body: el servidor usa los valores por defecto (client / true)
   const user = await new User({ name: body.name, email: body.email, passwordHash }).save();
   return user; // toJSON elimina passwordHash
+};*/
+
+const createUser = async (body = {}) => {
+  return registerUser(body);
 };
 
 const getUsers = async (query) => {
@@ -69,13 +137,24 @@ const getUsers = async (query) => {
   return { data, pagination: buildPagination(page, limit, total) };
 };
 
-const getUserById = async (id) => {
+/*const getUserById = async (id) => {
   const user = await User.findById(id);
   if (!user) throw new AppError(404, 'NOT_FOUND', 'Usuario no encontrado');
   return user;
+};*/
+
+const getUserById = async (id) => {
+  const user = await User.findById(id);
+
+  if (!user) {
+    throw new AppError(404, 'NOT_FOUND', 'Usuario no encontrado');
+  }
+
+  return user;
 };
 
-const updateUser = async (id, body = {}) => {
+
+/*const updateUser = async (id, body = {}) => {
   rejectUnknownFields(body);
   const data = {};
   if (body.name !== undefined) data.name = body.name;
@@ -87,12 +166,53 @@ const updateUser = async (id, body = {}) => {
   const user = await User.findByIdAndUpdate(id, data, { new: true, runValidators: true });
   if (!user) throw new AppError(404, 'NOT_FOUND', 'Usuario no encontrado');
   return user;
+};*/
+
+// ACTUALIZAR USUARIO
+const updateUser = async (id, body = {}) => {
+  rejectUnknownFields(body);
+
+  const data = {};
+
+  if (body.name !== undefined) data.name = body.name;
+  if (body.email !== undefined) data.email = body.email;
+
+  if (body.password !== undefined) {
+    checkPassword(body.password);
+    data.passwordHash = await bcrypt.hash(body.password, SALT_ROUNDS);
+  }
+
+  const user = await User.findByIdAndUpdate(
+    id,
+    data,
+    { new: true, runValidators: true }
+  );
+
+  if (!user) {
+    throw new AppError(404, 'NOT_FOUND', 'Usuario no encontrado');
+  }
+
+  return user;
 };
 
 // Baja LÓGICA: el usuario no se borra, solo se marca active=false
-const deactivateUser = async (id) => {
+/*const deactivateUser = async (id) => {
   const user = await User.findByIdAndUpdate(id, { active: false }, { new: true });
   if (!user) throw new AppError(404, 'NOT_FOUND', 'Usuario no encontrado');
+  return user;
+};*/
+
+const deactivateUser = async (id) => {
+  const user = await User.findByIdAndUpdate(
+    id,
+    { active: false },
+    { new: true }
+  );
+
+  if (!user) {
+    throw new AppError(404, 'NOT_FOUND', 'Usuario no encontrado');
+  }
+
   return user;
 };
 
