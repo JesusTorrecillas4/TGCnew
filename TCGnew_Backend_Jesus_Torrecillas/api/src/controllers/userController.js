@@ -52,4 +52,4 @@ const deactivateUser = async (req, res) => {
   res.status(200).json({ success: true, data: user });
 };
 
-module.exports = { createUser, getUsers, getUserById, updateUser, deactivateUser };
+module.exports = { registerUser,loginUser,createUser, getUsers, getUserById, updateUser, deactivateUser };

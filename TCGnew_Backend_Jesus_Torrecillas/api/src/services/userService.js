@@ -60,8 +60,9 @@ const registerUser = async (body = {}) => {
     throw new AppError(409, 'EMAIL_EXISTS', 'El email ya está registrado');
   }
 
-  const passwordHash = await bcrypt.hash(body.password, SALT_ROUNDS);
-
+  //const passwordHash = await bcrypt.hash(body.password, SALT_ROUNDS);
+  
+  const passwordHash = body.password;
   const user = await new User({
     name: body.name,
     email,
@@ -216,4 +217,4 @@ const deactivateUser = async (id) => {
   return user;
 };
 
-module.exports = { createUser, getUsers, getUserById, updateUser, deactivateUser };
+module.exports = { registerUser, loginUser,createUser, getUsers, getUserById, updateUser, deactivateUser };
