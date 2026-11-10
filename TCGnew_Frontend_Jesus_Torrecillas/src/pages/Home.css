@@ -1,0 +1,64 @@
+
+.home {
+  padding: 30px;
+  text-align: center;
+}
+
+.home h1 {
+  font-size: 36px;
+  margin-bottom: 10px;
+}
+
+.home h2 {
+  margin-top: 40px;
+  margin-bottom: 25px;
+}
+
+.cartas-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 25px;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.carta {
+  background-color: #242438;
+  padding: 20px;
+  border-radius: 12px;
+  text-align: center;
+}
+
+.carta img {
+  width: 100%;
+  max-width: 240px;
+  border-radius: 8px;
+}
+
+.carta h3 {
+  margin: 15px 0 5px;
+}
+
+.carta p {
+  color: #bbbbcc;
+}
+
+.carta strong {
+  display: block;
+  font-size: 22px;
+  margin: 15px 0;
+  color: #b6a0ff;
+}
+
+.carta button {
+  background-color: #7353d8;
+  color: white;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.carta button:hover {
+  background-color: #9275f0;
+}

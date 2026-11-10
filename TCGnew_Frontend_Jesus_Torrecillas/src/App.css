@@ -1,0 +1,21 @@
+
+#root {
+  width: 100%;
+  min-height: 100vh;
+}
+
+nav {
+  background-color: #242438;
+  padding: 20px;
+  text-align: center;
+}
+
+nav a {
+  color: white;
+  text-decoration: none;
+  margin: 0 15px;
+}
+
+nav a:hover {
+  color: #b6a0ff;
+}
